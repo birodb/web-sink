@@ -1,15 +1,32 @@
-# restful-clojure
+## web-sink
 
-A Clojure library designed to ... well, that part is up to you.
+Yet another micro-blog/pastebin/bulletin-board webserver powered by Clojure.
 
-## Usage
+###Current status
+- on startup:
+  - create new sqlite database + tables if it doesn't exists
+  - create new web server(jetty)
+- added routing rule for POST to save new message in the db
+- added routing rule for GET to retrieve messages from the db
+  - html is generated using hiccup - could be changed to enlive
+- no users&login yet - could be used behind another web server for basic authentication/write access
 
-FIXME
+###Future plans
+-users/group/admin interface
+-login/register
+-BBCode support
+-private/public content
 
-## License
 
-Copyright © 2015 FIXME
+### Usage
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
-# web-sink
+lein run
+
+This will create a new sqlite database if it didn't exist and start the web server.  
+Connect to it with a browser and start adding/reading comments.
+
+### License
+
+Copyright © 2016
+
+Distributed under the Eclipse Public License either version 1.0.
