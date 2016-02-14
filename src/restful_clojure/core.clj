@@ -53,9 +53,19 @@
   (comp render)
   )
 
+(defn record-post!
+    [request]
+    (db/db-add-row! (:newpost (:params request)) (str request)))
+
 (defroutes app-routes
   ;(GET "/" [] (resource-response "index.html" {:root "public"}))
-  (ANY "/*" request (html (html-from-request request)))
+  ;(ANY "/*" request (html (html-from-request request)))
+  (POST "/*" request 
+    (do
+      ;(println request) 
+      (record-post! request)
+      (html (html-from-request request))))
+  (GET "/*" request (html (html-from-request request)))
   (route/resources "/")
   (route/not-found "<h1>Page not found<h1>"))
 

@@ -26,10 +26,14 @@
      ", Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP"
      ");")]))
 
-(defonce db_table_prep!
+(defonce db-table-prep!
   (create-table-if-not-exists!
    conn
    "people" "id" "name, email"))
+
+(defn db-add-row!
+    [name email]
+    (j/execute! conn ["INSERT INTO people (name, email) VALUES (?, ?);" name email]))
 
 ;(j/execute! conn ["INSERT INTO people (name, email) VALUES ('hugo', 'hugo@test.com');"])
 ;(j/execute! conn ["INSERT INTO people (name, email) VALUES ('emil', 'emil@test.com');"])
