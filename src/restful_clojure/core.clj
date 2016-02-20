@@ -32,6 +32,7 @@
       [:fieldset
        [:legend "New post - bbcode is not yet supported"]
        ;[:input {:type 'text :name "newpost"}]
+       [:input {:type 'hidden :name "redirecturl" :value (:url request)}]
        [:textarea {:rows 10 :cols 56 :name "newpost"}]
        [:br]
        [:input {:type 'submit :value "Send"}]]]]]])
@@ -57,6 +58,13 @@
     [request]
     (db/db-add-row! (:newpost (:params request)) (str request)))
 
+(defn html-redirect
+    [newurl]
+    {:status 303
+       :headers {"Location" newurl}
+       :body (html [:html [:body [:a {:href newurl} newurl]]])})
+
+
 (defroutes app-routes
   ;(GET "/" [] (resource-response "index.html" {:root "public"}))
   ;(ANY "/*" request (html (html-from-request request)))
@@ -64,7 +72,8 @@
     (do
       ;(println request) 
       (record-post! request)
-      (html (html-from-request request))))
+      (html-redirect (:redirecturl (:params request)))
+      ))
   (GET "/*" request (html (html-from-request request)))
   (route/resources "/")
   (route/not-found "<h1>Page not found<h1>"))
