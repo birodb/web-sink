@@ -40,3 +40,5 @@
 ;(j/execute! conn ["INSERT INTO people (name, email) VALUES ('admin', 'admin@test.com');"])
 ;(j/execute! conn ["INSERT INTO people (name, email) VALUES ('dozer', 'dozer@test.com');"])
 ;(load-table-data conn 'people)
+;CREATE TABLE "users" ("user_id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL  UNIQUE , "user_name" VARCHAR(64), "user_email" VARCHAR(100), "user_regdate" DATETIME DEFAULT CURRENT_TIMESTAMP, "user_type" INTEGER, "user_regip" VARCHAR(40), "user_groupid" INTEGER DEFAULT 0, "user_allowhtml" BOOL, "user_posts" INTEGER DEFAULT 0, "user_actkey" VARCHAR(40), "user_password" VARCHAR(40))
+;INSERT INTO "users" VALUES (null,"bob6","bob1@bob.com", CURRENT_TIMESTAMP,"3",null,"0","1","0",null,null);
