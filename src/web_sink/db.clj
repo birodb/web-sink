@@ -12,31 +12,31 @@
   (j/query my-connection ["SELECT * FROM ?;" table-name]))
 
 (defn execute!
-  [query-string]
-  (j/execute! my-connection [query-string]))
+  [sql-expr]
+  (j/execute! my-connection sql-expr))
 
 (defn create-table-if-not-exists!
   "create a table if not exists in db with pk as integer primary key"
   [table-name pk columns]
   (execute!
-   (str
-    ;(println (str 
-    "CREATE TABLE IF NOT EXISTS "
-    table-name 
-    " ("
-    pk
-    " INTEGER PRIMARY KEY ASC, "
-    columns
-    ", Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP"
-    ");")))
+   [(str
+                                        ;(println (str 
+      "CREATE TABLE IF NOT EXISTS "
+      table-name 
+      " ("
+      pk
+      " INTEGER PRIMARY KEY ASC, "
+      columns
+      ", Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP"
+      ");")]))
 
 (defn prep-tables!
   []
   (do
-    (execute! "CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY ASC, name TEXT NOT NULL, email TEXT NOT NULL, creation_ip TEXT, enabled BOOLEAN DEFAULT 0, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);")
-    (execute! "CREATE TABLE IF NOT EXISTS groups (group_id INTEGER PRIMARY KEY ASC, name TEXT NOT NULL, owner_id INTEGER, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(owner_id) REFERENCES users(user_id));")
-    (execute! "CREATE TABLE IF NOT EXISTS usersgroups (user_id INTEGER, group_id INTEGER, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(user_id), FOREIGN KEY(group_id) REFERENCES groups(group_id));")
-    (execute! "CREATE TABLE IF NOT EXISTS posts (post_id INTEGER PRIMARY KEY ASC, text TEXT NOT NULL, user_id INTEGER, creation_ip TEXT, permission INTEGER, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(user_id));")
+    (execute! ["CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY ASC, name TEXT NOT NULL, email TEXT NOT NULL, creation_ip TEXT, enabled BOOLEAN DEFAULT 0,  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);"])
+    (execute! ["CREATE TABLE IF NOT EXISTS groups (group_id INTEGER PRIMARY KEY ASC, name TEXT NOT NULL, creator_id INTEGER, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(creator_id) REFERENCES users(user_id));"])
+    (execute! ["CREATE TABLE IF NOT EXISTS usersgroups (user_id INTEGER, group_id INTEGER, creator_id INTEGER, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(user_id), FOREIGN KEY(group_id) REFERENCES groups(group_id), FOREIGN KEY(creator_id) REFERENCES users(user_id));"])
+    (execute! ["CREATE TABLE IF NOT EXISTS posts (post_id INTEGER PRIMARY KEY ASC, text TEXT NOT NULL, user_id INTEGER, group_id INTEGER, creation_ip TEXT, permission INTEGER, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(user_id), FOREIGN KEY(group_id) REFERENCES groups(group_id));"])
     (add-sample-data!)))
 
 (defonce create-tables prep-tables!)
