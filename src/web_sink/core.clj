@@ -55,14 +55,14 @@
   )
 
 (defn record-post!
-    [request]
-    (db/db-add-row! (:newpost (:params request)) (str request)))
+  [request]
+  (db/add-to-users! (:newpost (:params request)) (str request)))
 
 (defn html-redirect
-    [newurl]
-    {:status 303
-       :headers {"Location" newurl}
-       :body (html [:html [:body [:a {:href newurl} newurl]]])})
+  [target-url]
+  {:status 303
+   :headers {"Location" target-url}
+   :body (html [:html [:body [:div "Please activate the link if not automatically redirected:" :br [:a {:href target-url} target-url]]]])})
 
 
 (defroutes app-routes
@@ -87,6 +87,7 @@
 
 ;(defonce wserver (run-jetty app-handler {:port 3001 :join? false}))
 (defonce wserver (run-jetty app {:port 3001 :join? false}))
+;(defonce srv_start (new java.util.Date))
 
 (defn now [] (new java.util.Date))
 
