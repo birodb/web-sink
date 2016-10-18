@@ -3,15 +3,19 @@
   ;(use 'ring.adapter.jetty)
   ; => nil
   (:require [hiccup.core :refer [html h]]
-            [compojure.handler :as handler]
+            ;[compojure.handler :as handler]
+            [ring.middleware.defaults :refer :all]
             [compojure.route :as route]
             [compojure.core :refer [GET POST ANY context defroutes]]
             [ring.middleware.json :refer [wrap-json-params wrap-json-response]]
             [web-sink.db :as db]
             [net.cgrand.enlive-html :as ehtml]
-            [ring.adapter.jetty :refer [run-jetty]]))
+            [ring.adapter.jetty :refer [run-jetty]]
+            [clojure.java.shell :refer [sh]]))
 
-(defn html-from-request [request]
+(defn html-from-request
+  "generate html hiccup response sample"
+  [request]
   [:html 
    [:head 
     [:title "pastebin"]]
@@ -37,10 +41,12 @@
        [:br]
        [:input {:type 'submit :value "Send"}]]]]]])
 
-(defn app-handler [request]
-    {:status 200
-        :headers {"Content-Type" "text/html;encoding=us-ascii"}
-        :body (-> (html-from-request request) html)})
+(defn app-handler
+  "generate html response with header values set explicitly - or to be used in ring.adapter.jetty directly"
+  [request]
+  {:status 200
+   :headers {"Content-Type" "text/html; charset=UTF-8"}
+   :body (-> (html-from-request request) html)})
 
 (ehtml/deftemplate index "web_sink/template1.html"
   [ctxt]
@@ -49,43 +55,50 @@
 (defn render [t]
   (apply str t))
 
-(def render-to-response
-  ;  (comp response render)
-  (comp render)
-  )
+(comment (def render-to-response
+    (comp response render)))
 
 (defn record-post!
   [request]
   (db/add-to-users! (:newpost (:params request)) (str request)))
 
 (defn html-redirect
+  "redirect to new URL ex. after a POST action"
   [target-url]
   {:status 303
-   :headers {"Location" target-url}
-   :body (html [:html [:body [:div "Please activate the link if not automatically redirected:" :br [:a {:href target-url} target-url]]]])})
+   :headers {"Location" target-url
+             "Content-Type" "text/html; charset=UTF-8"}
+   :body (html
+          [:html
+           [:body
+            [:div "Please activate the link if not automatically redirected:"
+             :br
+             [:a {:href target-url} target-url]]]])})
 
 
 (defroutes app-routes
-  ;(GET "/" [] (resource-response "index.html" {:root "public"}))
-  ;(ANY "/*" request (html (html-from-request request)))
+                                        ;(GET "/" [] (resource-response "index.html" {:root "public"}))
+                                        ;(ANY "/*" request (html (html-from-request request)))
   (POST "/*" request 
-    (do
-      ;(println request) 
-      (record-post! request)
-      (html-redirect (:redirecturl (:params request)))
-      ))
+        (do
+                                        ;(println request) 
+          (record-post! request)
+          (html-redirect (:redirecturl (:params request)))))
   (GET "/*" request (html (html-from-request request)))
   (route/resources "/")
   (route/not-found "<h1>Page not found<h1>"))
 
-(def app
+(def app1
   (-> app-routes
-      handler/api      
-      ;wrap-json-params
-      ;wrap-json-response
-      ))
+      handler/api
+      (comment wrap-json-params
+                 wrap-json-response)))
+
+(def app
+  (-> app-routes (wrap-defaults  site-defaults)))
 
 ;(defonce wserver (run-jetty app-handler {:port 3001 :join? false}))
+;since the port can be acquired only once we create and start the server with defonce
 (defonce wserver (run-jetty app {:port 3001 :join? false}))
 ;(defonce srv_start (new java.util.Date))
 
@@ -99,4 +112,3 @@
 (defn -main 
   [& args]
   (mymain args))
-

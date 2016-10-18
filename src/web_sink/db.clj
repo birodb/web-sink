@@ -20,7 +20,6 @@
   [table-name pk columns]
   (execute!
    [(str
-                                        ;(println (str 
       "CREATE TABLE IF NOT EXISTS "
       table-name 
       " ("
@@ -30,6 +29,21 @@
       ", Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP"
       ");")]))
 
+(defn add-to-users!
+  [name email]
+  (j/execute!
+   my-connection
+   ["INSERT INTO users (name, email) VALUES (?, ?);" name email]))
+
+(defn add-sample-data!
+  []
+  (do
+    (execute! ["INSERT INTO users (name, email) SELECT ?, ? WHERE NOT EXISTS( SELECT 1 FROM users WHERE name = ? or email = ? );" "system" "system" "system" "system"])
+    (add-to-users! "admin" "admin@test.com")
+    (add-to-users! "dozer" "dozer@test.com")
+    (add-to-users! "hugo" "hugo@test.com")
+    (add-to-users! "emil" "emil@test.com")))
+ 
 (defn prep-tables!
   []
   (do
@@ -41,19 +55,5 @@
 
 (defonce create-tables prep-tables!)
 
-(defn add-to-users!
-  [name email]
-  (j/execute!
-   my-connection
-   ["INSERT INTO users (name, email) VALUES (?, ?);" name email]))
-
-(defn add-sample-data!
-  []
-  (do 
-    (add-to-users! "admin" "admin@test.com")
-    (add-to-users! "dozer" "dozer@test.com")
-    (add-to-users! "hugo" "hugo@test.com")
-    (add-to-users! "emil" "emil@test.com")))
- 
 ;" VALUES (null,"bob6","bob1@bob.com", CURRENT_TIMESTAMP,"3",null,"0","1","0",null,null);
  ;CREATE TABLE "users" ("user_id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL  UNIQUE , "user_name" VARCHAR(64), "user_email" VARCHAR(100), "user_regdate" DATETIME DEFAULT CURRENT_TIMESTAMP, "user_type" INTEGER, "user_regip" VARCHAR(40), "user_groupid" INTEGER DEFAULT 0, "user_allowhtml" BOOL, "user_posts" INTEGER DEFAULT 0, "user_actkey" VARCHAR(40), "user_password" VARCHAR(40))))
