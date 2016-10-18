@@ -12,7 +12,7 @@
             [net.cgrand.enlive-html :as ehtml]
             [ring.adapter.jetty :refer [run-jetty]]
             [clojure.java.shell :refer [sh]]
-            [cheshire.core :refer :all]))
+            [cheshire.core :refer [generate-string]]))
 
 (defn html-from-request
   "generate html hiccup response sample"
@@ -42,12 +42,17 @@
        [:br]
        [:input {:type 'submit :value "Send"}]]]]]])
 
-(defn app-handler
+(defn wrap-response
   "generate html response with header values set explicitly - or to be used in ring.adapter.jetty directly"
-  [request]
+  [response]
   {:status 200
    :headers {"Content-Type" "text/html; charset=UTF-8"}
-   :body (-> (html-from-request request) html)})
+   :body response})
+
+(defn app-handler
+  [request]
+  (wrap-response (-> (html-from-request request) html)))
+
 
 (ehtml/deftemplate index "web_sink/template1.html"
   [ctxt]
@@ -85,15 +90,20 @@
                                         ;(println request) 
           (record-post! request)
           (html-redirect (:redirecturl (:params request)))))
+  (GET "/mas" request (app-handler  request))
+  (GET "/foo" request (wrap-response (apply str (index {:message "hard-coded"}))))
+  (GET "/exec" request (wrap-response (html [:html [:body [:pre  (generate-string ((sh "ls" "-al") :out))]]])))
+  ;(( request "params") "q")
   (GET "/*" request (html (html-from-request request)))
   (route/resources "/")
   (route/not-found "<h1>Page not found<h1>"))
 
-(def app1
-  (-> app-routes
-      handler/api
-      (comment wrap-json-params
-                 wrap-json-response)))
+;(def app1
+;(-> app-routes
+;    handler/api
+;    (comment wrap-json-params
+;         wrap-json-response)))
+
 
 (def app
   (-> app-routes (wrap-defaults  api-defaults)))
