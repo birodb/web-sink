@@ -4,14 +4,15 @@
   ; => nil
   (:require [hiccup.core :refer [html h]]
             ;[compojure.handler :as handler]
-            [ring.middleware.defaults :refer :all]
+            [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [compojure.route :as route]
             [compojure.core :refer [GET POST ANY context defroutes]]
             [ring.middleware.json :refer [wrap-json-params wrap-json-response]]
             [web-sink.db :as db]
             [net.cgrand.enlive-html :as ehtml]
             [ring.adapter.jetty :refer [run-jetty]]
-            [clojure.java.shell :refer [sh]]))
+            [clojure.java.shell :refer [sh]]
+            [cheshire.core :refer :all]))
 
 (defn html-from-request
   "generate html hiccup response sample"
@@ -23,14 +24,14 @@
     [:h3 {:class "header"} "Pastebin powered by clojure"]
     [:br]
     ;[:div (str "user.dir: " (System/getProperty "user.dir"))]
-    [:div {:style "border: 1px solid green; width: 500px; align: center;"}
+    [:div {:style "border: 1px solid green; width: 800px; align: center;"}
      ;[:p (str "uri: " (:uri request))]
      ;[:p (str "query-string: " (h (:query-string request)))]
      ;[:p (str "remote-addr: " (h (:remote-addr request)))]
-     [:p (h (str request))]
+     [:p [:pre (h (generate-string (dissoc request :body) {:pretty true}))]]
      [:p (str "body: " (h (slurp (:body request))))]]
     [:br]
-    [:div  {:style "border: 1px solid blue; width: 500px; align: center;"}
+    [:div  {:style "border: 1px solid blue; width: 800px; align: center;"}
      [:a {:href ""} "Refresh"]
      [:form {:method 'post}
       [:fieldset
@@ -52,8 +53,8 @@
   [ctxt]
   [:p#message] (ehtml/content (:message ctxt)))
 
-(defn render [t]
-  (apply str t))
+(comment (defn render [t]
+    (apply str t)))
 
 (comment (def render-to-response
     (comp response render)))
@@ -95,11 +96,11 @@
                  wrap-json-response)))
 
 (def app
-  (-> app-routes (wrap-defaults  site-defaults)))
+  (-> app-routes (wrap-defaults  api-defaults)))
 
-;(defonce wserver (run-jetty app-handler {:port 3001 :join? false}))
 ;since the port can be acquired only once we create and start the server with defonce
 (defonce wserver (run-jetty app {:port 3001 :join? false}))
+;(defonce wserver (run-jetty app-handler {:port 3001 :join? false}))
 ;(defonce srv_start (new java.util.Date))
 
 (defn now [] (new java.util.Date))

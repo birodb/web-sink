@@ -12,6 +12,7 @@
                  [org.clojure/java.jdbc "0.4.2"]
                  [org.xerial/sqlite-jdbc "3.8.10.1"];need to use this on raspi/arm
                  [enlive "1.1.6"]
+                 [cheshire "5.6.3"]
                  [hiccup "1.0.5"]]
-  :plugins [[lein-ring "0.9.7"]]
+;  :plugins [[lein-ring "0.9.7"]]
   :main web-sink.core)
