@@ -92,7 +92,7 @@
           (html-redirect (:redirecturl (:params request)))))
   (GET "/mas" request (app-handler  request))
   (GET "/foo" request (wrap-response (apply str (index {:message "hard-coded"}))))
-  (GET "/exec" request (wrap-response (html [:html [:body [:pre  (generate-string ((sh "ls" "-al") :out))]]])))
+  (GET "/exec" request (wrap-response (html [:html [:body [:pre  (generate-string ((sh (:q (:params request))) :out))]]])))
   ;(( request "params") "q")
   (GET "/*" request (html (html-from-request request)))
   (route/resources "/")
