@@ -87,10 +87,10 @@
                                         ;(ANY "/*" request (html (html-from-request request)))
   (POST "/*" request 
         (do
-                                        ;(println request) 
           (record-post! request)
           (html-redirect (:redirecturl (:params request)))))
-  (GET "/mas" request (app-handler  request))
+  (GET "/mas*" request (app-handler  request))
+  (GET "/bar*" [& args] (wrap-response (apply str (index {:message (apply str args)}))))
   (GET "/foo" request (wrap-response (apply str (index {:message "hard-coded"}))))
   (GET "/exec" request (wrap-response (html [:html [:body [:pre  (generate-string ((sh (:q (:params request))) :out))]]])))
   ;(( request "params") "q")
@@ -106,7 +106,7 @@
 
 
 (def app
-  (-> app-routes (wrap-defaults  api-defaults)))
+  (-> #'app-routes (wrap-defaults  api-defaults)))
 
 ;since the port can be acquired only once we create and start the server with defonce
 (defonce wserver (run-jetty app {:port 3001 :join? false}))
