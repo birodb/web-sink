@@ -11,6 +11,7 @@
             [web-sink.db :as db]
             [net.cgrand.enlive-html :as ehtml]
             [ring.adapter.jetty :refer [run-jetty]]
+            [ring.middleware.cookies :refer [wrap-cookies]]
             [clojure.java.shell :refer [sh]]
             [cheshire.core :refer [generate-string]]))
 
@@ -90,7 +91,7 @@
           (record-post! request)
           (html-redirect (:redirecturl (:params request)))))
   (GET "/mas*" request (app-handler  request))
-  (GET "/bar*" [& args] (wrap-response (apply str (index {:message (apply str args)}))))
+  (GET "/bar/*" [& args] (wrap-response (apply str (index {:message (apply str args)}))))
   (GET "/foo" request (wrap-response (apply str (index {:message "hard-coded"}))))
   (GET "/exec" request (wrap-response (html [:html [:body [:pre  (generate-string ((sh (:q (:params request))) :out))]]])))
   ;(( request "params") "q")
@@ -104,9 +105,9 @@
 ;    (comment wrap-json-params
 ;         wrap-json-response)))
 
-
+;http://stackoverflow.com/questions/28904260/dynamic-handler-update-in-clojure-ring-compojure-repl
 (def app
-  (-> #'app-routes (wrap-defaults  api-defaults)))
+  (-> #'app-routes (wrap-defaults  (assoc api-defaults :cookies true))))
 
 ;since the port can be acquired only once we create and start the server with defonce
 (defonce wserver (run-jetty app {:port 3001 :join? false}))
