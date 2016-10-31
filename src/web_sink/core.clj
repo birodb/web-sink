@@ -4,14 +4,15 @@
   ; => nil
   (:require [hiccup.core :refer [html h]]
             ;[compojure.handler :as handler]
-            [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [compojure.route :as route]
             [compojure.core :refer [GET POST ANY context defroutes]]
-            [ring.middleware.json :refer [wrap-json-params wrap-json-response]]
             [web-sink.db :as db]
             [net.cgrand.enlive-html :as ehtml]
             [ring.adapter.jetty :refer [run-jetty]]
+            [ring.middleware.json :refer [wrap-json-params wrap-json-response]]
+            [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.cookies :refer [wrap-cookies]]
+            [ring.middleware.session.cookie :refer [cookie-store]]
             [clojure.java.shell :refer [sh]]
             [cheshire.core :refer [generate-string]]))
 
@@ -63,8 +64,8 @@
     (apply str t)))
 
 (comment (def render-to-response
-    (comp response render)))
-
+    (comp response render))
+)
 (defn record-post!
   [request]
   (db/add-to-users! (:newpost (:params request)) (str request)))
@@ -107,7 +108,13 @@
 
 ;http://stackoverflow.com/questions/28904260/dynamic-handler-update-in-clojure-ring-compojure-repl
 (def app
-  (-> #'app-routes (wrap-defaults  (assoc api-defaults :cookies true))))
+  (-> #'app-routes
+      (wrap-defaults
+       (assoc api-defaults
+              :cookies true
+              :proxy true
+              :session {:flash true :store (cookie-store)}
+              :security {:anti-forgery true}))))
 
 ;since the port can be acquired only once we create and start the server with defonce
 (defonce wserver (run-jetty app {:port 3001 :join? false}))
