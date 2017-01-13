@@ -1,6 +1,6 @@
-(ns restful-clojure.core-test
+(ns web-sink.core-test
   (:require [clojure.test :refer :all]
-            [restful-clojure.core :refer :all]))
+            [web-sink.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."
