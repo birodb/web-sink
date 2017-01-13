@@ -1,5 +1,4 @@
 (ns web-sink.core
-  (:gen-class)
   ;(use 'ring.adapter.jetty)
   ; => nil
   (:require [hiccup.core :refer [html h]]
@@ -14,7 +13,9 @@
             [ring.middleware.cookies :refer [wrap-cookies]]
             [ring.middleware.session.cookie :refer [cookie-store]]
             [clojure.java.shell :refer [sh]]
-            [cheshire.core :refer [generate-string]]))
+            [cheshire.core :refer [generate-string]])
+  (:import [org.eclipse.jetty.server.handler StatisticsHandler])
+  (:gen-class))
 
 (defn html-from-request
   "generate html hiccup response sample"
@@ -116,17 +117,29 @@
               :session {:flash true :store (cookie-store)}
               :security {:anti-forgery true}))))
 
+(def a-minute 60000)
+
+(defn conf
+  [server]
+  (let [stats-handler (StatisticsHandler.)
+        default-handler (.getHandler server)]
+    (.setHandler stats-handler default-handler)
+    (.setHandler server stats-handler)
+    (.setStopTimeout  server a-minute)
+    (.setStopAtShutdown server true)))
 ;since the port can be acquired only once we create and start the server with defonce
-(defonce wserver (run-jetty app {:port 3001 :join? false}))
+(defonce wserver (run-jetty app {:port 3001 :join? false :configurator conf}))
 ;(defonce wserver (run-jetty app-handler {:port 3001 :join? false}))
 ;(defonce srv_start (new java.util.Date))
+
 
 (defn now [] (new java.util.Date))
 
 (defn mymain 
   [& args]
   ;(println app)
-  (println "Dr. Bubo" " - " (now)))
+  (println "Dr. Bubo" " - " (now))
+  (clojure.repl/set-break-handler! #(.stop wserver)))
 
 (defn -main 
   [& args]
