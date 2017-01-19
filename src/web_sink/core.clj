@@ -129,27 +129,36 @@
     (.setStopTimeout  server a-minute)
     (.setStopAtShutdown server true)))
 ;since the port can be acquired only once we create and start the server with defonce
-;(defonce wserver (run-jetty app {:port 3001 :join? false :configurator conf}))
-;(defonce wserver (run-jetty app-handler {:port 3001 :join? false}))
-;(defonce srv_start (new java.util.Date))
 (defonce http-server (atom nil))
-(defn safe-create-server!
-  []
+(defn create-web-server!
+  [join]
   (when (nil? @http-server)
     (swap! 
       http-server 
       (fn [current-state]
-        (run-jetty app {:port 3001 :join? false :configurator conf})))))
+        (run-jetty app {:port 3001 :join? join :configurator conf})))))
+
+(use '[clojure.tools.nrepl.server :only (start-server stop-server)])
+(use '[clojure.repl])
+
+(defonce repl-server (atom nil))
+(defn create-repl-server!
+  []
+  (when (nil? @repl-server)
+    (swap! repl-server (fn [_] (start-server :port 4000 )))))
 
 (defn now [] (new java.util.Date))
 
 (defn mymain 
   [& args]
-  ;(println app)
+  (println args)
+  (create-repl-server!)
   (println "Dr. Bubo" " - " (now))
   ;(run-jetty app {:port 3001 :join? true :configurator conf})
-  (safe-create-server!)
-  ;(clojure.repl/set-break-handler! #(.stop wserver))
+  (create-web-server! false)
+  (clojure.repl/set-break-handler! 
+    (fn [_] (do (.stop @http-server)
+         (stop-server @repl-server))))
   )
 
 (defn -main 

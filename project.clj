@@ -13,7 +13,8 @@
                  [org.xerial/sqlite-jdbc "3.16.1"];need to use this on raspi/arm
                  [enlive "1.1.6"]
                  [cheshire "5.7.0"]
-                 [hiccup "1.0.5"]]
+                 [hiccup "1.0.5"]
+                 [org.clojure/tools.nrepl "0.2.12"]]
   :profiles {:dev {:dependencies [[ring/ring-devel "1.4.0"]
                                   [lein-ring "0.9.7"]]}}
 ;  :plugins [[lein-ring "0.9.7"]]
@@ -25,5 +26,5 @@
                  :port 4001
                  ;;on a raspi2 java isn't exactly fast
                  :timeout 120000
-                 :init (-main)
+                 :init (create-web-server! false)
                  })
