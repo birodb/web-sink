@@ -134,6 +134,7 @@
 ;(defonce srv_start (new java.util.Date))
 (defonce http-server (atom nil))
 (defn safe-create-server!
+  []
   (when (nil? @http-server)
     (swap! 
       http-server 

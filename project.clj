@@ -14,6 +14,15 @@
                  [enlive "1.1.6"]
                  [cheshire "5.7.0"]
                  [hiccup "1.0.5"]]
+  :profiles {:dev {:dependencies [[ring/ring-devel "1.4.0"]
+                                  [lein-ring "0.9.7"]]}}
 ;  :plugins [[lein-ring "0.9.7"]]
   :main web-sink.core
-  :aot [web-sink.core])
+  :aot [web-sink.core]
+
+  ;;based on leinigen/sample.project.clj
+  :repl-options {;;specify the repl port explicitly to have a consistent access point
+                 :port 4001
+                 ;;on a raspi2 java isn't exactly fast
+                 :timeout 120000
+                 })
