@@ -15,4 +15,5 @@
                  [cheshire "5.7.0"]
                  [hiccup "1.0.5"]]
 ;  :plugins [[lein-ring "0.9.7"]]
-  :main web-sink.core)
+  :main web-sink.core
+  :aot [web-sink.core])

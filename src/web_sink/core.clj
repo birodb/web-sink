@@ -132,7 +132,13 @@
 ;(defonce wserver (run-jetty app {:port 3001 :join? false :configurator conf}))
 ;(defonce wserver (run-jetty app-handler {:port 3001 :join? false}))
 ;(defonce srv_start (new java.util.Date))
-
+(defonce http-server (atom nil))
+(defn safe-create-server!
+  (when (nil? @http-server)
+    (swap! 
+      http-server 
+      (fn [current-state]
+        (run-jetty app {:port 3001 :join? false :configurator conf})))))
 
 (defn now [] (new java.util.Date))
 
@@ -140,7 +146,8 @@
   [& args]
   ;(println app)
   (println "Dr. Bubo" " - " (now))
-  (run-jetty app {:port 3001 :join? false :configurator conf})
+  ;(run-jetty app {:port 3001 :join? true :configurator conf})
+  (safe-create-server!)
   ;(clojure.repl/set-break-handler! #(.stop wserver))
   )
 
