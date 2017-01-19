@@ -115,7 +115,8 @@
               :cookies true
               :proxy true
               :session {:flash true :store (cookie-store)}
-              :security {:anti-forgery true}))))
+              ;:security {:anti-forgery true}
+              ))))
 
 (def a-minute 60000)
 
@@ -128,7 +129,7 @@
     (.setStopTimeout  server a-minute)
     (.setStopAtShutdown server true)))
 ;since the port can be acquired only once we create and start the server with defonce
-(defonce wserver (run-jetty app {:port 3001 :join? false :configurator conf}))
+;(defonce wserver (run-jetty app {:port 3001 :join? false :configurator conf}))
 ;(defonce wserver (run-jetty app-handler {:port 3001 :join? false}))
 ;(defonce srv_start (new java.util.Date))
 
@@ -139,7 +140,9 @@
   [& args]
   ;(println app)
   (println "Dr. Bubo" " - " (now))
-  (clojure.repl/set-break-handler! #(.stop wserver)))
+  (run-jetty app {:port 3001 :join? false :configurator conf})
+  ;(clojure.repl/set-break-handler! #(.stop wserver))
+  )
 
 (defn -main 
   [& args]
