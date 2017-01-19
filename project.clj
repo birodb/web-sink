@@ -25,4 +25,5 @@
                  :port 4001
                  ;;on a raspi2 java isn't exactly fast
                  :timeout 120000
+                 :init (-main)
                  })
